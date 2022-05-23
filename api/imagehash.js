@@ -3,11 +3,13 @@ const fs = require("fs")
 const express = require('express');
 const router = express.Router();
 const path =  require('path');
-const createHash = (uri) => {
+const multer = require('multer');
+const upload = multer()
+
+
+const createHash = (fBuffer) => {
   return new Promise(res => {
-    // const fBuffer = fs.readFileSync(path);
-    console.log(uri)
-    imageHash(uri, 32, true, (error, data) => {
+    imageHash({ data: fBuffer}, 32, true, (error, data) => {
       if (error) throw error;
       res(data)
     });
@@ -28,11 +30,12 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.post('/upload-image', (req, res) => {
-  console.log(req.body);
+router.post('/upload-image', upload.single('file'),async (req, res) => {
+  const fBuffer = req.file.buffer;
+  const hash = await createHash(fBuffer);
   res.json({
     status: 200,
-    url: '111'
-  })
+    hash: hash
+  });
 })
 module.exports = router;
