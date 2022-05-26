@@ -6,7 +6,7 @@ const path = require('path');
 const multer = require('multer');
 const upload = multer()
 // const tf = require('@tensorflow/tfjs-node');
-const tf = require('tfjs-lambda')
+const tf = require('tensorflow-lambda')
 const Jimp = require("jimp");
 const { default: axios } = require('axios');
 const createHash = (fBuffer) => {
