@@ -8,7 +8,7 @@ const upload = multer()
 // const tf = require('@tensorflow/tfjs-node');
 const loadTf = require('tfjs-lambda')
 // const tf = require('tensorflow-lambda')
-const tf = await loadTf()
+
 const Jimp = require("jimp");
 const { default: axios } = require('axios');
 const createHash = (fBuffer) => {
@@ -44,6 +44,7 @@ router.post('/upload-image', upload.single('file'), async (req, res) => {
 })
 
 router.post('/get-tagging', upload.single('file'), async (req, res) => {
+  const tf = await loadTf()
   const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
   const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
 
