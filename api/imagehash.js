@@ -2,18 +2,15 @@ const { imageHash } = require('image-hash');
 const fs = require("fs")
 const express = require('express');
 const router = express.Router();
-const path =  require('path');
+const path = require('path');
 const multer = require('multer');
 const upload = multer()
-const tf  = require('@tensorflow/tfjs-node');
+const tf = require('@tensorflow/tfjs-node');
 const Jimp = require("jimp");
 const { default: axios } = require('axios');
-const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
-const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
-
 const createHash = (fBuffer) => {
   return new Promise(res => {
-    imageHash({ data: fBuffer}, 32, true, (error, data) => {
+    imageHash({ data: fBuffer }, 32, true, (error, data) => {
       if (error) throw error;
       res(data)
     });
@@ -21,7 +18,7 @@ const createHash = (fBuffer) => {
 }
 
 router.get('/', async (req, res) => {
-  const root ='https://sun9-85.userapi.com/s/v1/ig2/45x4lTwMI9mDfblAf5fVlRHyiORowBhTC5M2ThQxf3Avq9spzMHnt4InVu-c-Zsgx73FXEXxu67NuYY83F6i7Pbh.jpg?size=1365x2048&quality=96&type=album';
+  const root = 'https://sun9-85.userapi.com/s/v1/ig2/45x4lTwMI9mDfblAf5fVlRHyiORowBhTC5M2ThQxf3Avq9spzMHnt4InVu-c-Zsgx73FXEXxu67NuYY83F6i7Pbh.jpg?size=1365x2048&quality=96&type=album';
   const hash = await createHash(root);
   try {
     res.json({
@@ -34,7 +31,7 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.post('/upload-image', upload.single('file'),async (req, res) => {
+router.post('/upload-image', upload.single('file'), async (req, res) => {
   const fBuffer = req.file.buffer;
   const hash = await createHash(fBuffer);
   res.json({
@@ -43,7 +40,10 @@ router.post('/upload-image', upload.single('file'),async (req, res) => {
   });
 })
 
-router.post('/get-tagging',upload.single('file'), async (req, res) => {
+router.post('/get-tagging', upload.single('file'), async (req, res) => {
+  const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
+  const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
+
   const metadata = await axios.get(metadataURL)
   const fBuffer = req.file.buffer;
   const image = await Jimp.read(fBuffer);
@@ -69,15 +69,15 @@ router.post('/get-tagging',upload.single('file'), async (req, res) => {
   const labels = metadata.data.labels;
   const model = await tf.loadLayersModel(modelURL);
   let predictions = await model.predict(img_tensor).dataSync();
- 
-  const total =  predictions.reduce((t, item) => {
+
+  const total = predictions.reduce((t, item) => {
     return t += item;
   }, 0)
   const classify = [];
   for (let i = 0; i < predictions.length; i++) {
     const label = labels[i];
     const probability = Math.round(predictions[i] * 100 / total);
-    if(probability > 0) {
+    if (probability > 0) {
       classify.push({
         label: label,
         score: probability
