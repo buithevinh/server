@@ -18,5 +18,5 @@ app.use('/api/imagehash', allowCORS, hash)
 
 app.listen(port, () => console.log('server run port 8000'))
 app.get('/', async (req, res) => {
-  res.json({ staus: 200, message: '111' })
+  res.json({ staus: 200, message: '11111' })
 })
