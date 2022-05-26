@@ -5,10 +5,7 @@ const router = express.Router();
 const path = require('path');
 const multer = require('multer');
 const upload = multer()
-// const tf = require('@tensorflow/tfjs-node');
 const loadTf = require('tfjs-lambda')
-// const tf = require('tensorflow-lambda')
-
 const Jimp = require("jimp");
 const { default: axios } = require('axios');
 const createHash = (fBuffer) => {
@@ -68,7 +65,7 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     i++;
   });
   const outShape = [224, 224, NUM_OF_CHANNELS];
-  let img_tensor = tf.tensor3d(arrays, outShape, 'float32');
+  let img_tensor =  await tf.tidy(() => tf.tensor3d(arrays, outShape, 'float32'));
   img_tensor = img_tensor.expandDims(0);
   const labels = metadata.data.labels;
   const model = await tf.loadLayersModel(modelURL);
