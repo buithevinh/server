@@ -7,6 +7,7 @@ const multer = require('multer');
 const upload = multer()
 const loadTf = require('tfjs-lambda')
 const Jimp = require("jimp");
+const vptree =  require('vptree');
 const { default: axios } = require('axios');
 const createHash = (fBuffer) => {
   return new Promise(res => {
@@ -34,6 +35,7 @@ router.get('/', async (req, res) => {
 router.post('/upload-image', upload.single('file'), async (req, res) => {
   const fBuffer = req.file.buffer;
   const hash = await createHash(fBuffer);
+  const tree = vptree.load()
   res.json({
     status: 200,
     hash: hash
@@ -42,10 +44,10 @@ router.post('/upload-image', upload.single('file'), async (req, res) => {
 
 router.post('/get-tagging', upload.single('file'), async (req, res) => {
   const tf = await loadTf()
-  const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
-  const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
+  const modelURL ='file://model/' + 'model.json';
+  const metadataURL = '../model/' + 'metadata.json';
 
-  const metadata = await axios.get(metadataURL)
+  const metadata = require(metadataURL)
   const fBuffer = req.file.buffer;
   const image = await Jimp.read(fBuffer);
   image.cover(224, 224, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE);
@@ -67,7 +69,7 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
   const outShape = [224, 224, NUM_OF_CHANNELS];
   let img_tensor =  await tf.tidy(() => tf.tensor3d(arrays, outShape, 'float32'));
   img_tensor = img_tensor.expandDims(0);
-  const labels = metadata.data.labels;
+  const labels = metadata.labels;
   const model = await tf.loadLayersModel(modelURL);
   let predictions = await model.predict(img_tensor).dataSync();
 
