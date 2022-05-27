@@ -11,7 +11,6 @@ const vptree =  require('vptree');
 const { default: axios } = require('axios');
 const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
-let tf, model;
 const createHash = (fBuffer) => {
   return new Promise(res => {
     imageHash({ data: fBuffer }, 32, true, (error, data) => {
@@ -20,11 +19,11 @@ const createHash = (fBuffer) => {
     });
   })
 }
-const initApp = async () => {
-  tf = await loadTf();
-  model = await tf.loadLayersModel(modelURL);
-}
-initApp();
+// const initApp = async () => {
+//   tf = await loadTf();
+//   model = await tf.loadLayersModel(modelURL);
+// }
+// initApp();
 router.get('/', async (req, res) => {
   const root = 'https://sun9-85.userapi.com/s/v1/ig2/45x4lTwMI9mDfblAf5fVlRHyiORowBhTC5M2ThQxf3Avq9spzMHnt4InVu-c-Zsgx73FXEXxu67NuYY83F6i7Pbh.jpg?size=1365x2048&quality=96&type=album';
   const hash = await createHash(root);
@@ -50,8 +49,9 @@ router.post('/upload-image', upload.single('file'), async (req, res) => {
 })
 
 router.post('/get-tagging', upload.single('file'), async (req, res) => {
-  // const tf = await loadTf()
-  const metadata = await axios.get(metadataURL)
+  const tf = await loadTf();
+  const model = await tf.loadLayersModel(modelURL);
+  const metadata = await axios.get(metadataURL);
   const fBuffer = req.file.buffer;
   const image = await Jimp.read(fBuffer);
   image.cover(224, 224, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE);
@@ -73,7 +73,7 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
   let img_tensor =  await tf.tidy(() => tf.tensor3d(arrays, outShape, 'float32'));
   img_tensor = img_tensor.expandDims(0);
   const labels = metadata.data.labels;
-  // const model = await tf.loadLayersModel(modelURL);
+  
   let predictions = await model.predict(img_tensor).dataSync();
 
   const total = predictions.reduce((t, item) => {
