@@ -43,7 +43,6 @@ router.get('/get-classify', async(req, res) => {
       classify: JSON.parse(classify),
       process: 'done'
     })
-    client.del(time)
   } else{
     res.json({
       status: 200,
