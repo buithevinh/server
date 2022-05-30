@@ -3,6 +3,7 @@ const app = express();
 const hash = require('./api/imagehash')
 
 const {IO} = require('./socketio')
+const {initTree} = require('./loadtree')
 const http = require('http');
 const server = http.createServer(app);
 const io = IO(server)
@@ -21,7 +22,7 @@ const allowCORS = function (req, res, next) {
   next();
 };
 app.use('/api/imagehash', allowCORS, hash)
-
+initTree()
 server.listen(port);
 app.use((req, res, next) => {
   req.io = io

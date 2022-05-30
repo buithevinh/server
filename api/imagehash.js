@@ -7,24 +7,12 @@ const multer = require('multer');
 const upload = multer()
 const loadTf = require('tfjs-lambda')
 const Jimp = require("jimp");
-const vptree = require('vptree');
 const { default: axios } = require('axios');
 const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
-const datatree = require('../datatree.json');
-const hashTree = require('../hashtree.json')
-const {getIO} = require('../socketio')
-var one_bits = [0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4];
-var hammingDistance = function(hash1, hash2) {
-  var d = 0;
-  var i;
-  for (i = 0; i < hash1.length; i++) {
-      var n1 = parseInt(hash1[i], 16);
-      var n2 = parseInt(hash2[i], 16);
-      d += one_bits[n1 ^ n2];
-  }
-  return d;
-};
+
+const { getIO } = require('../socketio');
+const { getTree } = require('../loadtree');
 const createHash = (fBuffer) => {
   return new Promise(res => {
     imageHash({ data: fBuffer }, 32, true, (error, data) => {
@@ -50,7 +38,8 @@ router.get('/', async (req, res) => {
 router.post('/upload-image', upload.single('file'), async (req, res) => {
   const fBuffer = req.file.buffer;
   const hash = await createHash(fBuffer);
-  const tree = vptree.load(hashTree,hammingDistance ,datatree);
+  
+  const tree = getTree();
   const nears = tree.search(hash, 50);
   res.json({
     status: 200,
