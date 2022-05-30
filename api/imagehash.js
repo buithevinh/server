@@ -121,6 +121,5 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     }
   }
   obj[time] = classify;
-  // getIO().emit(time, classify)
 })
 module.exports = router;
