@@ -1,6 +1,7 @@
 const fs = require("fs")
 const vptree = require('vptree');
-const hashTree = fs.readFileSync('../hashtree.json');
+const { join } = require('path');
+const hashTree = fs.readFileSync(join(__dirname, 'hashtree.json'), 'utf8');
 const hashJson = JSON.parse(hashTree);
 
 var one_bits = [0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4];
