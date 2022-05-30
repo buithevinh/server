@@ -7,12 +7,12 @@ const multer = require('multer');
 const upload = multer()
 const loadTf = require('tfjs-lambda')
 const Jimp = require("jimp");
-const { initTree } = require('../loadtree')
+
 const { default: axios } = require('axios');
 const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
 
-const { getTree } = require('../loadtree');
+
 const createHash = (fBuffer) => {
   return new Promise(res => {
     imageHash({ data: fBuffer }, 32, true, (error, data) => {
