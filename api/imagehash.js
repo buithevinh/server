@@ -12,7 +12,6 @@ const { default: axios } = require('axios');
 const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
 
-// const { getIO } = require('../socketio');
 const { getTree } = require('../loadtree');
 const createHash = (fBuffer) => {
   return new Promise(res => {
@@ -24,7 +23,6 @@ const createHash = (fBuffer) => {
 }
 router.get('/', async (req, res) => {
   const root = 'https://sun9-85.userapi.com/s/v1/ig2/45x4lTwMI9mDfblAf5fVlRHyiORowBhTC5M2ThQxf3Avq9spzMHnt4InVu-c-Zsgx73FXEXxu67NuYY83F6i7Pbh.jpg?size=1365x2048&quality=96&type=album';
-  // const hash = await createHash(root);
   try {
     res.json({
       status: 200,
