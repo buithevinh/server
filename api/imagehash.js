@@ -11,8 +11,6 @@ const Jimp = require("jimp");
 const { default: axios } = require('axios');
 const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
-
-
 const createHash = (fBuffer) => {
   return new Promise(res => {
     imageHash({ data: fBuffer }, 32, true, (error, data) => {
@@ -33,26 +31,7 @@ router.get('/', async (req, res) => {
     return res.status(500).send('Server error')
   }
 })
-// let tree;
-// router.post('/upload-image', upload.single('file'), async (req, res) => {
-//   const time = new Date().getTime();
-//   const fBuffer = req.file.buffer;
-//   res.json({
-//     status: 200,
-//     time: time
-//   });
-//   const hash = await createHash(fBuffer);
-//   if(!tree) {
-//     tree =  initTree();
-//   }
-//   const interval = setInterval(() => {
-//     if (tree) {
-//       const nears = getTree().search(hash, 50);
-//       getIO().emit(time, nears);
-//       clearInterval(interval)
-//     }
-//   }, 1000)
-// })
+
 let obj = {};
 router.get('/get-classify', async(req, res) => {
   const time = req.query.time;
