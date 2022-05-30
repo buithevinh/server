@@ -35,29 +35,26 @@ router.get('/', async (req, res) => {
     return res.status(500).send('Server error')
   }
 })
-let tree;
-router.post('/upload-image', upload.single('file'), async (req, res) => {
-  const time = new Date().getTime();
-  const fBuffer = req.file.buffer;
-  res.json({
-    status: 200,
-    time: time
-  });
-  const hash = await createHash(fBuffer);
-  if(!tree) {
-    tree =  initTree();
-  }
-  const interval = setInterval(() => {
-    if (tree) {
-      const nears = getTree().search(hash, 50);
-      getIO().emit(time, nears);
-      clearInterval(interval)
-    }
-  }, 1000)
-
-
-
-})
+// let tree;
+// router.post('/upload-image', upload.single('file'), async (req, res) => {
+//   const time = new Date().getTime();
+//   const fBuffer = req.file.buffer;
+//   res.json({
+//     status: 200,
+//     time: time
+//   });
+//   const hash = await createHash(fBuffer);
+//   if(!tree) {
+//     tree =  initTree();
+//   }
+//   const interval = setInterval(() => {
+//     if (tree) {
+//       const nears = getTree().search(hash, 50);
+//       getIO().emit(time, nears);
+//       clearInterval(interval)
+//     }
+//   }, 1000)
+// })
 
 
 router.post('/get-tagging', upload.single('file'), async (req, res) => {
