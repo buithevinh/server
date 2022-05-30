@@ -7,10 +7,24 @@ const multer = require('multer');
 const upload = multer()
 const loadTf = require('tfjs-lambda')
 const Jimp = require("jimp");
-const vptree =  require('vptree');
+const vptree = require('vptree');
 const { default: axios } = require('axios');
 const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
+const datatree = require('../datatree.json');
+const hashTree = require('../hashtree.json')
+const {getIO} = require('../socketio')
+var one_bits = [0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4];
+var hammingDistance = function(hash1, hash2) {
+  var d = 0;
+  var i;
+  for (i = 0; i < hash1.length; i++) {
+      var n1 = parseInt(hash1[i], 16);
+      var n2 = parseInt(hash2[i], 16);
+      d += one_bits[n1 ^ n2];
+  }
+  return d;
+};
 const createHash = (fBuffer) => {
   return new Promise(res => {
     imageHash({ data: fBuffer }, 32, true, (error, data) => {
@@ -19,18 +33,13 @@ const createHash = (fBuffer) => {
     });
   })
 }
-// const initApp = async () => {
-//   tf = await loadTf();
-//   model = await tf.loadLayersModel(modelURL);
-// }
-// initApp();
 router.get('/', async (req, res) => {
   const root = 'https://sun9-85.userapi.com/s/v1/ig2/45x4lTwMI9mDfblAf5fVlRHyiORowBhTC5M2ThQxf3Avq9spzMHnt4InVu-c-Zsgx73FXEXxu67NuYY83F6i7Pbh.jpg?size=1365x2048&quality=96&type=album';
-  const hash = await createHash(root);
+  // const hash = await createHash(root);
   try {
     res.json({
       status: 200,
-      hash: hash
+      hash: root
     })
   } catch (err) {
     console.error(err);
@@ -41,14 +50,21 @@ router.get('/', async (req, res) => {
 router.post('/upload-image', upload.single('file'), async (req, res) => {
   const fBuffer = req.file.buffer;
   const hash = await createHash(fBuffer);
-  const tree = vptree.load()
+  const tree = vptree.load(hashTree,hammingDistance ,datatree);
+  const nears = tree.search(hash, 50);
   res.json({
     status: 200,
-    hash: hash
+    nears: nears
   });
 })
 
+
 router.post('/get-tagging', upload.single('file'), async (req, res) => {
+  const time = new Date().getTime();
+  res.json({
+    status: 200,
+    time: time
+  });
   const tf = await loadTf();
   const model = await tf.loadLayersModel(modelURL);
   const metadata = await axios.get(metadataURL);
@@ -70,10 +86,10 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     i++;
   });
   const outShape = [224, 224, NUM_OF_CHANNELS];
-  let img_tensor =  await tf.tidy(() => tf.tensor3d(arrays, outShape, 'float32'));
+  let img_tensor = await tf.tidy(() => tf.tensor3d(arrays, outShape, 'float32'));
   img_tensor = img_tensor.expandDims(0);
   const labels = metadata.data.labels;
-  
+
   let predictions = await model.predict(img_tensor).dataSync();
 
   const total = predictions.reduce((t, item) => {
@@ -90,9 +106,6 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
       })
     }
   }
-  res.json({
-    status: 200,
-    classify: classify
-  });
+  getIO().emit(time, classify)
 })
 module.exports = router;
