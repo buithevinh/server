@@ -8,7 +8,7 @@ const http = require('http');
 const server = http.createServer(app);
 const io = IO(server)
 app.use(express.json({ extended: false }));
-
+const tree =  initTree();
 const port = process.env.port || 8000;
 app.all('/', function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -22,7 +22,7 @@ const allowCORS = function (req, res, next) {
   next();
 };
 app.use('/api/imagehash', allowCORS, hash)
-initTree()
+
 server.listen(port);
 app.use((req, res, next) => {
   req.io = io
