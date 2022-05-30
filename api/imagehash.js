@@ -33,7 +33,7 @@ router.get('/', async (req, res) => {
   }
 })
 
-let obj = {};
+
 router.get('/get-classify', async(req, res) => {
   const time = req.query.time;
   const classify = await client.get(time);
@@ -54,7 +54,6 @@ router.get('/get-classify', async(req, res) => {
 });
 router.post('/get-tagging', upload.single('file'), async (req, res) => {
   time = new Date().getTime();
-  obj[time] = null;
   res.json({
     status: 200,
     time: time
