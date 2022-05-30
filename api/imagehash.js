@@ -12,7 +12,7 @@ const { default: axios } = require('axios');
 const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
 
-const { getIO } = require('../socketio');
+// const { getIO } = require('../socketio');
 const { getTree } = require('../loadtree');
 const createHash = (fBuffer) => {
   return new Promise(res => {
@@ -55,10 +55,28 @@ router.get('/', async (req, res) => {
 //     }
 //   }, 1000)
 // })
-
-
+let obj = {};
+router.get('/get-classify', async(req, res) => {
+  const time = req.query.time;
+  if(obj[time]) {
+    res.json({
+      status: 200,
+      classify: obj[time],
+      process: 'done'
+    })
+   delete obj[time];
+  } else{
+    res.json({
+      status: 200,
+      classify: null,
+      process: 'wait'
+    })
+  }
+ 
+});
 router.post('/get-tagging', upload.single('file'), async (req, res) => {
-  const time = new Date().getTime();
+  time = new Date().getTime();
+  obj[time] = null;
   res.json({
     status: 200,
     time: time
@@ -104,6 +122,7 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
       })
     }
   }
-  getIO().emit(time, classify)
+  obj[time] = classify;
+  // getIO().emit(time, classify)
 })
 module.exports = router;

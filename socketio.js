@@ -1,5 +1,4 @@
 const { Server } = require("socket.io");
-const redisAdapter = require('socket.io-redis');
 
 let _io;
 const IO = (server) => {
@@ -10,7 +9,6 @@ const IO = (server) => {
     },
     transports: ["websocket"],
   });
-  _io.adapter(redisAdapter({ host: 'localhost', port: 6379 }));
   return _io;
 }
 const getIO = () => _io;
