@@ -24,7 +24,10 @@ const allowCORS = function (req, res, next) {
   next();
 };
 app.use('/api/imagehash', allowCORS, hash)
-
+app.use((req, res, next) => {
+  req.io = io
+  next()
+})
 server.listen(port);
 
 app.get('/', async (req, res) => {
