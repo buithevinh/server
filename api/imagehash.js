@@ -37,14 +37,19 @@ router.get('/', async (req, res) => {
 
 router.post('/upload-image', upload.single('file'), async (req, res) => {
   const fBuffer = req.file.buffer;
+  res.json({
+    status: 200,
+    time: time
+  });
   const hash = await createHash(fBuffer);
   
   const tree = getTree();
   const nears = tree.search(hash, 50);
-  res.json({
-    status: 200,
-    nears: nears
-  });
+  // res.json({
+  //   status: 200,
+  //   nears: nears
+  // });
+  getIO().emit(time, nears)
 })
 
 
