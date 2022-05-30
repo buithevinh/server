@@ -35,7 +35,7 @@ router.get('/', async (req, res) => {
     return res.status(500).send('Server error')
   }
 })
-
+let tree;
 router.post('/upload-image', upload.single('file'), async (req, res) => {
   const time = new Date().getTime();
   const fBuffer = req.file.buffer;
@@ -44,7 +44,9 @@ router.post('/upload-image', upload.single('file'), async (req, res) => {
     time: time
   });
   const hash = await createHash(fBuffer);
-  let tree = await initTree();
+  if(!tree) {
+    tree = await initTree();
+  }
   const interval = setInterval(() => {
     if (tree) {
       const nears = getTree().search(hash, 50);
