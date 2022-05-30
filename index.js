@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 const hash = require('./api/imagehash')
-const redis = require("socket.io-redis");
 app.use(express.json({ extended: false }));
 
 const port = process.env.port || 8000;
