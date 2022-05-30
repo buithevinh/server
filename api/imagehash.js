@@ -45,7 +45,7 @@ router.post('/upload-image', upload.single('file'), async (req, res) => {
   });
   const hash = await createHash(fBuffer);
   if(!tree) {
-    tree = await initTree();
+    tree =  initTree();
   }
   const interval = setInterval(() => {
     if (tree) {
