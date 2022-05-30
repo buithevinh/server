@@ -36,6 +36,7 @@ router.get('/', async (req, res) => {
 })
 
 router.post('/upload-image', upload.single('file'), async (req, res) => {
+  const time = new Date().getTime();
   const fBuffer = req.file.buffer;
   res.json({
     status: 200,
