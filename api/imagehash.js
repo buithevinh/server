@@ -7,7 +7,8 @@ const multer = require('multer');
 const upload = multer()
 const loadTf = require('tfjs-lambda')
 const Jimp = require("jimp");
-
+const Redis = require("ioredis");
+let client = new Redis("rediss://:f847c85142a94e13be0e8ab1c1a699ac@gusc1-valued-leech-30241.upstash.io:30241");
 const { default: axios } = require('axios');
 const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
@@ -35,13 +36,14 @@ router.get('/', async (req, res) => {
 let obj = {};
 router.get('/get-classify', async(req, res) => {
   const time = req.query.time;
-  if(obj[time]) {
+  const classify = await client.get(time);
+  if(classify) {
     res.json({
       status: 200,
-      classify: obj[time],
+      classify: JSON.parse(classify),
       process: 'done'
     })
-   delete obj[time];
+    client.del(time)
   } else{
     res.json({
       status: 200,
@@ -99,6 +101,7 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
       })
     }
   }
-  obj[time] = classify;
+  
+  client.set(time, JSON.stringify(classify));
 })
 module.exports = router;
