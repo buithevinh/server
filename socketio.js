@@ -3,7 +3,7 @@ let _io;
 const IO = (server) => {
   _io = new Server(server, {
     cors: {
-      origins: 'http://localhost:3000/',
+      origins: '*',
       credentials: true
     }
   });
