@@ -7,6 +7,7 @@ const multer = require('multer');
 const upload = multer()
 const loadTf = require('tfjs-lambda')
 const Jimp = require("jimp");
+const { initTree } = require('../loadtree')
 const { default: axios } = require('axios');
 const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
@@ -34,7 +35,7 @@ router.get('/', async (req, res) => {
     return res.status(500).send('Server error')
   }
 })
-
+let tree = initTree()
 router.post('/upload-image', upload.single('file'), async (req, res) => {
   const time = new Date().getTime();
   const fBuffer = req.file.buffer;
@@ -43,14 +44,20 @@ router.post('/upload-image', upload.single('file'), async (req, res) => {
     time: time
   });
   const hash = await createHash(fBuffer);
-  
-  const tree = getTree();
-  const nears = tree.search(hash, 50);
-  // res.json({
-  //   status: 200,
-  //   nears: nears
-  // });
-  getIO().emit(time, nears)
+  const interval = setInterval(() => {
+    if (tree) {
+      const nears = getTree().search(hash, 50);
+      // res.json({
+      //   status: 200,
+      //   nears: nears
+      // });
+      getIO().emit(time, nears);
+      clearInterval(interval)
+    }
+  }, 1000)
+
+
+
 })
 
 

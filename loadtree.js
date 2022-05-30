@@ -17,7 +17,7 @@ var hammingDistance = function (hash1, hash2) {
 };
 let tree = {};
 const initTree = async () => {
-  tree =  vptree.build(hashJson, hammingDistance);
+  tree =  await vptree.build(hashJson, hammingDistance);
   return tree;
 }
 

@@ -3,12 +3,12 @@ const app = express();
 const hash = require('./api/imagehash')
 
 const {IO} = require('./socketio')
-const {initTree} = require('./loadtree')
+
 const http = require('http');
 const server = http.createServer(app);
 const io = IO(server)
 app.use(express.json({ extended: false }));
-const tree =  initTree();
+
 const port = process.env.port || 8000;
 app.all('/', function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
