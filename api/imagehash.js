@@ -15,7 +15,16 @@ const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' 
 const { queryCategory } = require('../sql/index');
 const DATABASE_URL = 'mysql://j905jfden4fm:pscale_pw_0Q0flY1LhT7PmgXuO5JJp0kFq-SU9WEwx79Q7q4rxCY@syyxo9qotcdf.ap-southeast-2.psdb.cloud/oppai?ssl={}'
 const mysql = require('mysql2/promise');
-let connection = mysql.createConnection(DATABASE_URL)
+const pool = mysql.createPool({
+  host:'syyxo9qotcdf.ap-southeast-2.psdb.cloud',
+  user: 'jqdflyb71gbf',
+  password: 'pscale_pw_6S5GEWEDXVw41K6-BdAUF2c0y_Yjw7gf032L3S_C154',
+  database: 'oppai',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  ssl: {}
+})
 const createHash = (fBuffer) => {
   return new Promise(res => {
     imageHash({ data: fBuffer }, 32, true, (error, data) => {
@@ -113,9 +122,7 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
 
 router.get('/get-photos', async (req, res) => {
   const { category, score } = req.query;
-  if (!connection) {
-    connection = await mysql.createConnection(DATABASE_URL)
-  }
+  const connection = await pool.getConnection()
   const photos = await connection.query(queryCategory, [category, score - 10, score + 10])
   res.json({
     status: 200,
