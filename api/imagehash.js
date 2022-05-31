@@ -12,6 +12,10 @@ let client = new Redis("rediss://:f847c85142a94e13be0e8ab1c1a699ac@gusc1-valued-
 const { default: axios } = require('axios');
 const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
+const { queryCategory } = require('../sql/index');
+const DATABASE_URL = 'mysql://a2h9shb47f0y:pscale_pw_ZJ_BYttq4CAgB_DtCqXyWSmBsS1dT1ItpQZ9spTqoaI@syyxo9qotcdf.ap-southeast-2.psdb.cloud/oppai?ssl={}'
+const mysql = require('mysql2/promise');
+
 const createHash = (fBuffer) => {
   return new Promise(res => {
     imageHash({ data: fBuffer }, 32, true, (error, data) => {
@@ -105,5 +109,15 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
   }
 
   client.set(time, JSON.stringify(classify));
+})
+
+router.get('/get-photos', async (req, res) => {
+  const { category, score } = req.query;
+  const connection = await mysql.createConnection(DATABASE_URL)
+  const photos = await connection.query(queryCategory, [category, score - 10, score + 10])
+  res.json({
+    status: 200,
+    photos: photos[0]
+  })
 })
 module.exports = router;
