@@ -13,9 +13,9 @@ const { default: axios } = require('axios');
 const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
 const { queryCategory } = require('../sql/index');
-const DATABASE_URL = 'mysql://a2h9shb47f0y:pscale_pw_ZJ_BYttq4CAgB_DtCqXyWSmBsS1dT1ItpQZ9spTqoaI@syyxo9qotcdf.ap-southeast-2.psdb.cloud/oppai?ssl={}'
+const DATABASE_URL = 'mysql://j905jfden4fm:pscale_pw_0Q0flY1LhT7PmgXuO5JJp0kFq-SU9WEwx79Q7q4rxCY@syyxo9qotcdf.ap-southeast-2.psdb.cloud/oppai?ssl={}'
 const mysql = require('mysql2/promise');
-
+let connection = mysql.createConnection(DATABASE_URL)
 const createHash = (fBuffer) => {
   return new Promise(res => {
     imageHash({ data: fBuffer }, 32, true, (error, data) => {
@@ -113,7 +113,9 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
 
 router.get('/get-photos', async (req, res) => {
   const { category, score } = req.query;
-  const connection = await mysql.createConnection(DATABASE_URL)
+  if (!connection) {
+    connection = await mysql.createConnection(DATABASE_URL)
+  }
   const photos = await connection.query(queryCategory, [category, score - 10, score + 10])
   res.json({
     status: 200,
