@@ -20,6 +20,7 @@ const createHash = (fBuffer) => {
     });
   })
 }
+let tf = null;
 router.get('/', async (req, res) => {
   const root = 'https://sun9-85.userapi.com/s/v1/ig2/45x4lTwMI9mDfblAf5fVlRHyiORowBhTC5M2ThQxf3Avq9spzMHnt4InVu-c-Zsgx73FXEXxu67NuYY83F6i7Pbh.jpg?size=1365x2048&quality=96&type=album';
   try {
@@ -34,31 +35,33 @@ router.get('/', async (req, res) => {
 })
 
 
-router.get('/get-classify', async(req, res) => {
+router.get('/get-classify', async (req, res) => {
   const time = req.query.time;
   const classify = await client.get(time);
-  if(classify) {
+  if (classify) {
     res.json({
       status: 200,
       classify: JSON.parse(classify),
       process: 'done'
     })
-  } else{
+  } else {
     res.json({
       status: 200,
       classify: null,
       process: 'wait'
     })
   }
- 
+
 });
 router.post('/get-tagging', upload.single('file'), async (req, res) => {
-  time = new Date().getTime();
+  const time = new Date().getTime();
   res.json({
     status: 200,
     time: time
   });
-  const tf = await loadTf();
+  if (!tf) {
+    tf = await loadTf();
+  }
   const model = await tf.loadLayersModel(modelURL);
   const metadata = await axios.get(metadataURL);
   const fBuffer = req.file.buffer;
@@ -99,7 +102,7 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
       })
     }
   }
-  
+
   client.set(time, JSON.stringify(classify));
 })
 module.exports = router;
