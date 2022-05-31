@@ -13,12 +13,11 @@ const { default: axios } = require('axios');
 const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
 const { queryCategory } = require('../sql/index');
-const DATABASE_URL = 'mysql://j905jfden4fm:pscale_pw_0Q0flY1LhT7PmgXuO5JJp0kFq-SU9WEwx79Q7q4rxCY@syyxo9qotcdf.ap-southeast-2.psdb.cloud/oppai?ssl={}'
 const mysql = require('mysql2/promise');
 const pool = mysql.createPool({
   host:'syyxo9qotcdf.ap-southeast-2.psdb.cloud',
-  user: 'jqdflyb71gbf',
-  password: 'pscale_pw_6S5GEWEDXVw41K6-BdAUF2c0y_Yjw7gf032L3S_C154',
+  user:  process.env.user,
+  password: process.env.password,
   database: 'oppai',
   waitForConnections: true,
   connectionLimit: 10,
