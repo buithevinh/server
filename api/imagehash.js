@@ -62,6 +62,9 @@ router.get('/', async (req, res) => {
 
 router.get('/get-classify', async (req, res) => {
   const time = req.query.time;
+  if(!client) {
+    client = new Redis("rediss://:f847c85142a94e13be0e8ab1c1a699ac@gusc1-valued-leech-30241.upstash.io:30241");
+  }
   const classify = await client.get(time);
   if (classify) {
     res.json({
