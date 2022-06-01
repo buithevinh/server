@@ -5,17 +5,14 @@ const router = express.Router();
 const path = require('path');
 const multer = require('multer');
 const upload = multer()
-// const loadTf = require('tfjs-lambda')
 const Jimp = require("jimp");
 const Redis = require("ioredis");
 let client = new Redis("rediss://:f847c85142a94e13be0e8ab1c1a699ac@gusc1-valued-leech-30241.upstash.io:30241");
 const { default: axios } = require('axios');
-const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
 const { queryCategory } = require('../sql/index');
 const mysql = require('mysql2/promise');
 const { getTf, getModel } = require('../loadInit');
-// const {getModel, getTf} = require('../loadInit')
 const pool = mysql.createPool({
   host:'syyxo9qotcdf.ap-southeast-2.psdb.cloud',
   user:  process.env.user,
@@ -73,7 +70,15 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     status: 200,
     time: time
   });
-  const tf = getTf();
+  let tf = getTf();
+  if(!tf) {
+    while(true) {
+      tf = getTf();
+      if(tf) {
+        break;
+      }
+    }
+  }
   const model = getModel();
   const metadata = await axios.get(metadataURL);
   const fBuffer = req.file.buffer;

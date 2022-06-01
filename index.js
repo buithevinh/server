@@ -4,8 +4,9 @@ const hash = require('./api/imagehash')
 app.use(express.json({ extended: false }));
 const {setModel, setTf} = require('./loadInit/index')
 const port = process.env.port || 8000;
-setModel()
 setTf();
+setModel()
+
 app.all('/', function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
