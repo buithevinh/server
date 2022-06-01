@@ -71,14 +71,6 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     time: time
   });
   let tf = getTf();
-  if(!tf) {
-    while(true) {
-      tf = getTf();
-      if(tf) {
-        break;
-      }
-    }
-  }
   const model = getModel();
   const metadata = await axios.get(metadataURL);
   const fBuffer = req.file.buffer;

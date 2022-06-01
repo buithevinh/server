@@ -8,6 +8,7 @@ const setTf = async () => {
   return tf;
 }
 const getTf = () => tf;
+
 const setModel= async () => {
   const tf = await setTf();
   model = await tf.loadLayersModel(modelURL);

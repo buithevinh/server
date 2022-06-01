@@ -4,8 +4,7 @@ const hash = require('./api/imagehash')
 app.use(express.json({ extended: false }));
 const {setModel, setTf} = require('./loadInit/index')
 const port = process.env.port || 8000;
-setTf();
-setModel()
+
 
 app.all('/', function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -19,7 +18,10 @@ const allowCORS = function (req, res, next) {
   next();
 };
 app.use('/api/imagehash', allowCORS, hash)
-app.listen(port);
+app.listen(port,async () => {
+  await setTf();
+  await setModel()
+});
 app.get('/', async (req, res) => {
   res.json({ staus: 200, message: '2222222' })
 })
