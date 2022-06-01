@@ -28,7 +28,7 @@ const pool = mysql.createPool({
 })
 
 router.get('/init', async (req, res) => {
-  if(client) {
+  if(!client) {
     client = new Redis("rediss://:f847c85142a94e13be0e8ab1c1a699ac@gusc1-valued-leech-30241.upstash.io:30241");
   }
   res.json({
