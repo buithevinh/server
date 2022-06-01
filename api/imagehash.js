@@ -5,7 +5,7 @@ const router = express.Router();
 const path = require('path');
 const multer = require('multer');
 const upload = multer()
-const loadTf = require('tfjs-lambda')
+// const loadTf = require('tfjs-lambda')
 const Jimp = require("jimp");
 const Redis = require("ioredis");
 let client = new Redis("rediss://:f847c85142a94e13be0e8ab1c1a699ac@gusc1-valued-leech-30241.upstash.io:30241");
@@ -14,6 +14,8 @@ const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + '
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
 const { queryCategory } = require('../sql/index');
 const mysql = require('mysql2/promise');
+const { getTf, getModel } = require('../loadInit');
+// const {getModel, getTf} = require('../loadInit')
 const pool = mysql.createPool({
   host:'syyxo9qotcdf.ap-southeast-2.psdb.cloud',
   user:  process.env.user,
@@ -32,7 +34,6 @@ const createHash = (fBuffer) => {
     });
   })
 }
-let tf = null;
 router.get('/', async (req, res) => {
   const root = 'https://sun9-85.userapi.com/s/v1/ig2/45x4lTwMI9mDfblAf5fVlRHyiORowBhTC5M2ThQxf3Avq9spzMHnt4InVu-c-Zsgx73FXEXxu67NuYY83F6i7Pbh.jpg?size=1365x2048&quality=96&type=album';
   try {
@@ -72,10 +73,8 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     status: 200,
     time: time
   });
-  if (!tf) {
-    tf = await loadTf();
-  }
-  const model = await tf.loadLayersModel(modelURL);
+  const tf = getTf();
+  const model = getModel();
   const metadata = await axios.get(metadataURL);
   const fBuffer = req.file.buffer;
   const image = await Jimp.read(fBuffer);
