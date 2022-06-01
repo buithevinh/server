@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/buithevinh/server#readme",
   "dependencies": {
+    "@tensorflow/tfjs-node": "^3.18.0",
     "add": "^2.0.6",
     "axios": "^0.27.2",
     "cors": "^2.8.5",
