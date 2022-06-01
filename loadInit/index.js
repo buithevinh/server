@@ -9,7 +9,16 @@ const setModel= async () => {
   return model;
 }
 
-const getModel = () => model;
+const getModel = () => {
+  return new Promise(res => {
+    const interval = setInterval(() => {
+      if(model) {
+        clearInterval(interval)
+        res(model)
+      }
+    }, 500)
+  })
+};
 
 module.exports = {
   setModel,
