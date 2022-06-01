@@ -7,13 +7,15 @@ const multer = require('multer');
 const upload = multer()
 const Jimp = require("jimp");
 const Redis = require("ioredis");
-let client = new Redis("rediss://:f847c85142a94e13be0e8ab1c1a699ac@gusc1-valued-leech-30241.upstash.io:30241");
+let client = null;
 const { default: axios } = require('axios');
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
 const { queryCategory } = require('../sql/index');
 const mysql = require('mysql2/promise');
 const loadTf = require('tfjs-lambda');
-const {  getModel } = require('../loadInit');
+const { getModel, setModel } = require('../loadInit');
+let tf = null;
+let model  = null;
 const pool = mysql.createPool({
   host:'syyxo9qotcdf.ap-southeast-2.psdb.cloud',
   user:  process.env.user,
@@ -23,6 +25,19 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
   ssl: {}
+})
+
+router.get('/init', async (req, res) => {
+  if(client) {
+    client = new Redis("rediss://:f847c85142a94e13be0e8ab1c1a699ac@gusc1-valued-leech-30241.upstash.io:30241");
+  }
+  res.json({
+    status: 200,
+    init: true
+  })
+  if(!model) {
+    await setModel();
+  }
 })
 const createHash = (fBuffer) => {
   return new Promise(res => {
@@ -63,8 +78,7 @@ router.get('/get-classify', async (req, res) => {
     })
   }
 });
-let tf = null;
-let model  = null;
+
 router.post('/get-tagging', upload.single('file'), async (req, res) => {
   const time = new Date().getTime();
   res.json({
