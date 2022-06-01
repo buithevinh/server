@@ -12,16 +12,15 @@ app.all('/', function (req, res, next) {
   next();
 });
 
-const allowCORS = function (req, res, next) {
+const allowCORS = async function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
+
   next();
 };
+setModel()
 app.use('/api/imagehash', allowCORS, hash)
-app.listen(port,async () => {
-  await setTf();
-  await setModel()
-});
+app.listen(port);
 app.get('/', async (req, res) => {
   res.json({ staus: 200, message: '2222222' })
 })

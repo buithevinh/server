@@ -12,7 +12,8 @@ const { default: axios } = require('axios');
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
 const { queryCategory } = require('../sql/index');
 const mysql = require('mysql2/promise');
-const { getTf, getModel } = require('../loadInit');
+const loadTf = require('tfjs-lambda');
+const {  getModel } = require('../loadInit');
 const pool = mysql.createPool({
   host:'syyxo9qotcdf.ap-southeast-2.psdb.cloud',
   user:  process.env.user,
@@ -44,7 +45,6 @@ router.get('/', async (req, res) => {
   }
 })
 
-
 router.get('/get-classify', async (req, res) => {
   const time = req.query.time;
   const classify = await client.get(time);
@@ -62,16 +62,21 @@ router.get('/get-classify', async (req, res) => {
       process: 'wait'
     })
   }
-
 });
+let tf = null;
+let model  = null;
 router.post('/get-tagging', upload.single('file'), async (req, res) => {
   const time = new Date().getTime();
   res.json({
     status: 200,
     time: time
   });
-  let tf = getTf();
-  const model = getModel();
+  if(!tf) {
+    tf = await loadTf()
+  }
+  if(!model) {
+    model = await getModel();
+  }
   const metadata = await axios.get(metadataURL);
   const fBuffer = req.file.buffer;
   const image = await Jimp.read(fBuffer);
