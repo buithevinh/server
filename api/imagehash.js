@@ -18,16 +18,7 @@ const loadTf = require('tfjs-lambda');
 const { getModel, setModel } = require('../loadInit');
 let tf = null;
 let model  = null;
-const pool = mysql.createPool({
-  host: process.env.hostSQL,
-  user:  process.env.user,
-  password: process.env.password,
-  database: 'oppai',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  ssl: {}
-})
+
 
 router.get('/init', async (req, res) => {
   if(!client) {
@@ -141,6 +132,16 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
 
 router.get('/get-photos', async (req, res) => {
   const { category, score, total, offset } = req.query;
+  const pool = mysql.createPool({
+    host: process.env.hostSQL,
+    user:  process.env.user,
+    password: process.env.password,
+    database: 'oppai',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    ssl: {}
+  })
   const connection = await pool.getConnection()
   let count = total;
   let pageIndex = parseInt(offset);
@@ -158,8 +159,19 @@ router.get('/get-photos', async (req, res) => {
   })
 })
 router.get('/category', async(req, res) => {
+  const pool = mysql.createPool({
+    host: process.env.hostSQL,
+    user:  process.env.user,
+    password: process.env.password,
+    database: 'oppai',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    ssl: {}
+  })
   const { category, total, offset } = req.query;
-  const connection = await pool.getConnection()
+  const connection = await pool.getConnection();
+
   let pageIndex = parseInt(offset);
   if(!total) {
     count = await connection.query(queryTotalCategory, [category]);
