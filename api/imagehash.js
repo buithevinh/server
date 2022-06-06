@@ -94,8 +94,7 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     tf = await loadTf()
   }
   if(!model) {
-    await setModel();
-    model = await getModel();
+    model = await tf.loadLayersModel(modelURL);
   }
   const metadata = await axios.get(metadataURL);
   const fBuffer = req.file.buffer;
