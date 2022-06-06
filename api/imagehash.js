@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const multer = require('multer');
-
+const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
 const upload = multer()
 const Jimp = require("jimp");
 const Redis = require("ioredis");
