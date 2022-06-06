@@ -1,23 +1,25 @@
 const { imageHash } = require('image-hash');
+require('dotenv').config()
 const fs = require("fs")
 const express = require('express');
 const router = express.Router();
 const path = require('path');
 const multer = require('multer');
+
 const upload = multer()
 const Jimp = require("jimp");
 const Redis = require("ioredis");
 let client = null;
 const { default: axios } = require('axios');
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
-const { queryCategory } = require('../sql/index');
+const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore } = require('../sql/index');
 const mysql = require('mysql2/promise');
 const loadTf = require('tfjs-lambda');
 const { getModel, setModel } = require('../loadInit');
 let tf = null;
 let model  = null;
 const pool = mysql.createPool({
-  host:'syyxo9qotcdf.ap-southeast-2.psdb.cloud',
+  host: process.env.hostSQL,
   user:  process.env.user,
   password: process.env.password,
   database: 'oppai',
@@ -29,7 +31,7 @@ const pool = mysql.createPool({
 
 router.get('/init', async (req, res) => {
   if(!client) {
-    client = new Redis("rediss://:f847c85142a94e13be0e8ab1c1a699ac@gusc1-valued-leech-30241.upstash.io:30241");
+    client = new Redis(process.env.redis);
   }
   res.json({
     status: 200,
@@ -63,7 +65,7 @@ router.get('/', async (req, res) => {
 router.get('/get-classify', async (req, res) => {
   const time = req.query.time;
   if(!client) {
-    client = new Redis("rediss://:f847c85142a94e13be0e8ab1c1a699ac@gusc1-valued-leech-30241.upstash.io:30241");
+    client = new Redis(process.env.redis);
   }
   const classify = await client.get(time);
   if (classify) {
@@ -92,6 +94,7 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     tf = await loadTf()
   }
   if(!model) {
+    await setModel();
     model = await getModel();
   }
   const metadata = await axios.get(metadataURL);
@@ -138,12 +141,38 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
 })
 
 router.get('/get-photos', async (req, res) => {
-  const { category, score } = req.query;
+  const { category, score, total, offset } = req.query;
   const connection = await pool.getConnection()
-  const photos = await connection.query(queryCategory, [category, score - 10, score + 10])
+  let count = total;
+  let pageIndex = parseInt(offset);
+  if(!total) {
+    count = await connection.query(queryTotalByScore, [category, score - 10, score + 10]);
+    const size =  Math.floor(count[0][0].total / 100)
+    pageIndex = Math.floor(Math.random() * size); 
+  }
+  const photos = await connection.query(queryCategoryByScore, [category, score - 10, score + 10, pageIndex * 100]);
   res.json({
     status: 200,
-    photos: photos[0]
+    photos: photos[0],
+    total: count[0][0].total,
+    pageIndex: pageIndex
+  })
+})
+router.get('/category', async(req, res) => {
+  const { category, total, offset } = req.query;
+  const connection = await pool.getConnection()
+  let pageIndex = parseInt(offset);
+  if(!total) {
+    count = await connection.query(queryTotalCategory, [category]);
+    const size =  Math.floor(count[0][0].total / 100)
+    pageIndex = Math.floor(Math.random() * size); 
+  }
+  const photos = await connection.query(queryCategory, [category, pageIndex * 100]);
+  res.json({
+    status: 200,
+    photos: photos[0],
+    total: count[0][0].total,
+    pageIndex: pageIndex
   })
 })
 module.exports = router;
