@@ -12,13 +12,24 @@ const Redis = require("ioredis");
 let client = null;
 const { default: axios } = require('axios');
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
-const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore } = require('../sql/index');
+const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore, queryInstagramPhotos, sqlGetUserInstagrams, sqlGetUserByUserName, sqlGetPhotoInstagrams, sqlCountPhotoByUserName } = require('../sql/index');
 const mysql = require('mysql2/promise');
 const loadTf = require('tfjs-lambda');
 const { getModel, setModel } = require('../loadInit');
 let tf = null;
 let model  = null;
-
+const createPoolSQL = () =>{
+  return mysql.createPool({
+    host: process.env.hostSQL,
+    user:  process.env.user,
+    password: process.env.password,
+    database: 'oppai',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    ssl: {}
+  })
+}
 
 router.get('/init', async (req, res) => {
   if(!client) {
@@ -132,16 +143,7 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
 
 router.get('/get-photos', async (req, res) => {
   const { category, score, total, offset } = req.query;
-  const pool = mysql.createPool({
-    host: process.env.hostSQL,
-    user:  process.env.user,
-    password: process.env.password,
-    database: 'oppai',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    ssl: {}
-  })
+  const pool = createPoolSQL();
   const connection = await pool.getConnection()
   let count = total;
   let pageIndex = parseInt(offset);
@@ -159,16 +161,7 @@ router.get('/get-photos', async (req, res) => {
   })
 })
 router.get('/category', async(req, res) => {
-  const pool = mysql.createPool({
-    host: process.env.hostSQL,
-    user:  process.env.user,
-    password: process.env.password,
-    database: 'oppai',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    ssl: {}
-  })
+  const pool = createPoolSQL();
   const { category, total, offset } = req.query;
   const connection = await pool.getConnection();
 
@@ -184,6 +177,47 @@ router.get('/category', async(req, res) => {
     photos: photos[0],
     total: count[0][0].total,
     pageIndex: pageIndex
+  })
+})
+
+router.get('/get-instagrams', async (req, res) => {
+  const pool = createPoolSQL();
+  const connection = await pool.getConnection();
+  const { offset } = req.query;
+  const photos = await connection.query(queryInstagramPhotos, [parseInt(offset)]);
+  res.json({
+    status: 200,
+    photos: photos[0]
+  })
+})
+router.get('/get-user-instagrams', async (req, res) => {
+  const pool = createPoolSQL();
+  const connection = await pool.getConnection();
+  const userIns = await connection.query(sqlGetUserInstagrams);
+  res.json({
+    status: 200,
+    userIns: userIns[0]
+  })
+})
+router.get('/get-photo-instagrams' ,async (req, res) => {
+  const pool = createPoolSQL();
+  const { user_name, offset, pageSize } = req.query;
+ 
+  const connection = await pool.getConnection();
+  const userIns = await connection.query(sqlGetUserByUserName, [user_name]);
+  const album_id = userIns[0][0].album_id;
+  const pageIndex = parseInt(offset) || 0;
+  let size = pageSize;
+  if(!size) {
+    const datas = await connection.query(sqlCountPhotoByUserName, [album_id]);
+    size = datas[0][0].total 
+  }
+  
+  const photos = await connection.query(sqlGetPhotoInstagrams, [album_id, pageIndex]);
+  res.json({
+    status: 200,
+    photos: photos[0],
+    size: size
   })
 })
 module.exports = router;
