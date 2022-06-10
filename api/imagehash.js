@@ -31,18 +31,6 @@ const createPoolSQL = () =>{
   })
 }
 
-router.get('/init', async (req, res) => {
-  if(!client) {
-    client = new Redis(process.env.redis);
-  }
-  res.json({
-    status: 200,
-    init: true
-  })
-  if(!model) {
-    await setModel();
-  }
-})
 const createHash = (fBuffer) => {
   return new Promise(res => {
     imageHash({ data: fBuffer }, 32, true, (error, data) => {
