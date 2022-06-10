@@ -12,7 +12,7 @@ const Redis = require("ioredis");
 let client = null;
 const { default: axios } = require('axios');
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
-const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore, queryInstagramPhotos, sqlGetUserInstagrams, sqlGetUserByUserName, sqlGetPhotoInstagrams, sqlCountPhotoByUserName } = require('../sql/index');
+const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore, queryInstagramPhotos, sqlGetUserInstagrams, sqlGetUserByUserName, sqlGetPhotoInstagrams, sqlCountPhotoByUserName,sqlTotalInstagram } = require('../sql/index');
 const mysql = require('mysql2/promise');
 const loadTf = require('tfjs-lambda');
 const { getModel, setModel } = require('../loadInit');
@@ -184,10 +184,18 @@ router.get('/get-instagrams', async (req, res) => {
   const pool = createPoolSQL();
   const connection = await pool.getConnection();
   const { offset } = req.query;
-  const photos = await connection.query(queryInstagramPhotos, [parseInt(offset)]);
+  let pageindex = parseInt(offset) ;
+  
+  if(!offset) {
+    const response = await connection.query(sqlTotalInstagram);
+    const sizePhoto = response[0][0].total;
+    pageindex =  Math.floor(Math.random() * sizePhoto); 
+  }
+  const photos = await connection.query(queryInstagramPhotos, [pageindex]);
   res.json({
     status: 200,
-    photos: photos[0]
+    photos: photos[0],
+    offset: pageindex
   })
 })
 router.get('/get-user-instagrams', async (req, res) => {
