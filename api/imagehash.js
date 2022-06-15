@@ -6,22 +6,29 @@ const router = express.Router();
 const path = require('path');
 const multer = require('multer');
 const modelURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'model.json';
+const { createClient } = require('@supabase/supabase-js')
 const upload = multer()
 const Jimp = require("jimp");
 const Redis = require("ioredis");
 let client = null;
 const { default: axios } = require('axios');
+const crypto = require('crypto');
+const secret = 'oppai-xKlYuxUch';
+
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
-const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore, queryInstagramPhotos, sqlGetUserInstagrams, sqlGetUserByUserName, sqlGetPhotoInstagrams, sqlCountPhotoByUserName,sqlTotalInstagram } = require('../sql/index');
+const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore, queryInstagramPhotos, sqlGetUserInstagrams, sqlGetUserByUserName, sqlGetPhotoInstagrams, sqlCountPhotoByUserName, sqlTotalInstagram, sqlGetUserByUserNames, sqlGetPhotobyUserNames } = require('../sql/index');
 const mysql = require('mysql2/promise');
 const loadTf = require('tfjs-lambda');
-const { getModel, setModel } = require('../loadInit');
 let tf = null;
-let model  = null;
-const createPoolSQL = () =>{
+let model = null;
+const supabase = createClient(
+  process.env.URL_SUPABASE,
+  process.env.TOKEN_SUPABASE
+)
+const createPoolSQL = () => {
   return mysql.createPool({
     host: process.env.hostSQL,
-    user:  process.env.user,
+    user: process.env.user,
     password: process.env.password,
     database: 'oppai',
     waitForConnections: true,
@@ -54,7 +61,7 @@ router.get('/', async (req, res) => {
 
 router.get('/get-classify', async (req, res) => {
   const time = req.query.time;
-  if(!client) {
+  if (!client) {
     client = new Redis(process.env.redis);
   }
   const classify = await client.get(time);
@@ -80,10 +87,10 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     status: 200,
     time: time
   });
-  if(!tf) {
+  if (!tf) {
     tf = await loadTf()
   }
-  if(!model) {
+  if (!model) {
     model = await tf.loadLayersModel(modelURL);
   }
   const metadata = await axios.get(metadataURL);
@@ -135,10 +142,10 @@ router.get('/get-photos', async (req, res) => {
   const connection = await pool.getConnection()
   let count = total;
   let pageIndex = parseInt(offset);
-  if(!total) {
+  if (!total) {
     count = await connection.query(queryTotalByScore, [category, score - 10, score + 10]);
-    const size =  Math.floor(count[0][0].total / 100)
-    pageIndex = Math.floor(Math.random() * size); 
+    const size = Math.floor(count[0][0].total / 100)
+    pageIndex = Math.floor(Math.random() * size);
   }
   const photos = await connection.query(queryCategoryByScore, [category, score - 10, score + 10, pageIndex * 100]);
   res.json({
@@ -148,16 +155,16 @@ router.get('/get-photos', async (req, res) => {
     pageIndex: pageIndex
   })
 })
-router.get('/category', async(req, res) => {
+router.get('/category', async (req, res) => {
   const pool = createPoolSQL();
   const { category, total, offset } = req.query;
   const connection = await pool.getConnection();
 
   let pageIndex = parseInt(offset);
-  if(!total) {
+  if (!total) {
     count = await connection.query(queryTotalCategory, [category]);
-    const size =  Math.floor(count[0][0].total / 100)
-    pageIndex = Math.floor(Math.random() * size); 
+    const size = Math.floor(count[0][0].total / 100)
+    pageIndex = Math.floor(Math.random() * size);
   }
   const photos = await connection.query(queryCategory, [category, pageIndex * 100]);
   res.json({
@@ -172,12 +179,12 @@ router.get('/get-instagrams', async (req, res) => {
   const pool = createPoolSQL();
   const connection = await pool.getConnection();
   const { offset } = req.query;
-  let pageindex = parseInt(offset) ;
-  
-  if(!offset) {
+  let pageindex = parseInt(offset);
+
+  if (!offset) {
     const response = await connection.query(sqlTotalInstagram);
     const sizePhoto = response[0][0].total;
-    pageindex =  Math.floor(Math.random() * sizePhoto); 
+    pageindex = Math.floor(Math.random() * sizePhoto);
   }
   const photos = await connection.query(queryInstagramPhotos, [pageindex]);
   res.json({
@@ -195,25 +202,77 @@ router.get('/get-user-instagrams', async (req, res) => {
     userIns: userIns[0]
   })
 })
-router.get('/get-photo-instagrams' ,async (req, res) => {
+router.get('/get-photo-instagrams', async (req, res) => {
   const pool = createPoolSQL();
   const { user_name, offset, pageSize } = req.query;
- 
+
   const connection = await pool.getConnection();
   const userIns = await connection.query(sqlGetUserByUserName, [user_name]);
   const album_id = userIns[0][0].album_id;
   const pageIndex = parseInt(offset) || 0;
   let size = pageSize;
-  if(!size) {
+  if (!size) {
     const datas = await connection.query(sqlCountPhotoByUserName, [album_id]);
-    size = datas[0][0].total 
+    size = datas[0][0].total
   }
-  
+
   const photos = await connection.query(sqlGetPhotoInstagrams, [album_id, pageIndex]);
   res.json({
     status: 200,
     photos: photos[0],
     size: size
+  })
+})
+router.get('/get-users-face', async(req, res) => {
+  const { hash } = req.query;
+  if (!client) {
+    client = new Redis(process.env.redis);
+  }
+  const pool = createPoolSQL();
+  const data = await client.hget(hash, 'users');
+  const user_names = JSON.parse(data);
+  const ids = user_names.map(item => item.album_id);
+  const connection = await pool.getConnection();
+  const respones = await connection.query(sqlGetPhotobyUserNames, [ids]);
+  res.json({
+    status: 200,
+    photos: respones[0],
+    user_names: user_names
+  })
+})
+router.get('/get-face-id', async (req, res) => {
+  const { descs } = req.query;
+  const values = Object.values(JSON.parse(descs))
+  const start_vector = values.slice(0, 64)
+  const end_vector = values.slice(64, 128)
+  const { data, error } = await supabase
+    .rpc('get_face_id', {
+      start_vector,
+      end_vector
+    })
+  const obj = {};
+  for (let i = 0; i < data.length; i++) {
+    obj[data[i].user_name] = data[i].user_name
+  }
+  const pool = createPoolSQL();
+  const user_names = Object.keys(obj);
+  const connection = await pool.getConnection();
+
+  const userInfors = await connection.query(sqlGetUserByUserNames, [user_names]);
+  const ids = userInfors[0].map(item => item.id).join();
+  const hashValue = crypto.createHash('sha256', secret)
+  const key = hashValue.update(ids).digest('hex');
+  if (!client) {
+    client = new Redis(process.env.redis);
+  }
+  const getUser = await client.hget(key, 'users');
+  if(!getUser) {
+    client.hset(key, {'users': JSON.stringify(userInfors[0])})
+    client.expire(key, 86400000);
+  }
+  res.json({
+    status: 200,
+    hash: key
   })
 })
 module.exports = router;

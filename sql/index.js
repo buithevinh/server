@@ -7,7 +7,9 @@ const sqlGetUserInstagrams = 'select *  from `informationInstagram` ORDER BY RAN
 const sqlGetPhotoInstagrams = 'select *  from `photosInstagram` where `album_id` = ? LIMIT 100 OFFSET ?';
 const sqlGetUserByUserName = 'select *  from `informationInstagram` where `user_name` = ?'
 const sqlCountPhotoByUserName = 'select COUNT(*) as `total` from `photosInstagram` where `album_id` = ?';
-const sqlTotalInstagram = 'select COUNT(*) as `total` from `photosInstagram`'
+const sqlTotalInstagram = 'select COUNT(*) as `total` from `photosInstagram`';
+const sqlGetUserByUserNames = 'select *  from `informationInstagram` where user_name in (?)';
+const sqlGetPhotobyUserNames = 'select *  from  (select *, row_number() over (partition by album_id order by album_id desc) as seqnum from photosInstagram f) f where seqnum <= 10 and album_id in (?)';
 module.exports = {
   queryCategoryByScore,
   queryTotalByScore,
@@ -18,5 +20,7 @@ module.exports = {
   sqlGetPhotoInstagrams,
   sqlGetUserByUserName,
   sqlCountPhotoByUserName,
-  sqlTotalInstagram
+  sqlTotalInstagram,
+  sqlGetUserByUserNames,
+  sqlGetPhotobyUserNames
 }
