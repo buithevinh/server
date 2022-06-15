@@ -178,15 +178,15 @@ router.get('/category', async (req, res) => {
 router.get('/get-instagrams', async (req, res) => {
   const pool = createPoolSQL();
   const connection = await pool.getConnection();
-  const { offset } = req.query;
+  const { offset, album_ids } = req.query;
   let pageindex = parseInt(offset);
 
   if (!offset) {
-    const response = await connection.query(sqlTotalInstagram);
+    const response = await connection.query(sqlTotalInstagram, [album_ids]);
     const sizePhoto = response[0][0].total;
     pageindex = Math.floor(Math.random() * sizePhoto);
   }
-  const photos = await connection.query(queryInstagramPhotos, [pageindex]);
+  const photos = await connection.query(queryInstagramPhotos, [album_ids, pageindex]);
   res.json({
     status: 200,
     photos: photos[0],
