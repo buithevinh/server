@@ -220,7 +220,8 @@ router.get('/get-photo-instagrams', async (req, res) => {
   res.json({
     status: 200,
     photos: photos[0],
-    size: size
+    size: size,
+    user: userIns[0][0]
   })
 })
 router.get('/get-users-face', async(req, res) => {
