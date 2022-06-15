@@ -202,6 +202,17 @@ router.get('/get-user-instagrams', async (req, res) => {
     userIns: userIns[0]
   })
 })
+router.get('/get-user-instagram', async (req, res) => {
+  const { user_name } = req.query;
+  const pool = createPoolSQL();
+  const connection = await pool.getConnection();
+  const userInfor = await connection.query(sqlGetUserByUserName, [user_name]);
+  res.json({
+    status: 200,
+    userInfor: userInfor[0][0]
+  })
+})
+
 router.get('/get-photo-instagrams', async (req, res) => {
   const pool = createPoolSQL();
   const { user_name, offset, pageSize } = req.query;
