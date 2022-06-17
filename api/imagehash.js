@@ -280,7 +280,7 @@ router.get('/get-face-id', async (req, res) => {
   const getUser = await client.hget(key, 'users');
   if(!getUser) {
     client.hset(key, {'users': JSON.stringify(userInfors[0])})
-    client.expire(key, 86400000);
+    client.expire(key, 86400);
   }
   res.json({
     status: 200,
