@@ -16,7 +16,7 @@ const crypto = require('crypto');
 const secret = 'oppai-xKlYuxUch';
 
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
-const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore, queryInstagramPhotos, sqlGetUserInstagrams, sqlGetUserByUserName, sqlGetPhotoInstagrams, sqlCountPhotoByUserName, sqlTotalInstagram, sqlGetUserByUserNames, sqlGetPhotobyUserNames } = require('../sql/index');
+const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore, queryInstagramPhotos, sqlGetUserInstagrams, sqlGetUserByUserName, sqlGetPhotoInstagrams, sqlCountPhotoByUserName, sqlTotalInstagram, sqlGetUserByUserNames, sqlGetPhotobyUserNames, sqlVideoInstagram } = require('../sql/index');
 const mysql = require('mysql2/promise');
 const loadTf = require('tfjs-lambda');
 let tf = null;
@@ -215,23 +215,15 @@ router.get('/get-user-instagram', async (req, res) => {
 
 router.get('/get-photo-instagrams', async (req, res) => {
   const pool = createPoolSQL();
-  const { user_name, offset, pageSize } = req.query;
-
+  const { user_name, offset } = req.query;
   const connection = await pool.getConnection();
   const userIns = await connection.query(sqlGetUserByUserName, [user_name]);
   const album_id = userIns[0][0].album_id;
   const pageIndex = parseInt(offset) || 0;
-  let size = pageSize;
-  if (!size) {
-    const datas = await connection.query(sqlCountPhotoByUserName, [album_id]);
-    size = datas[0][0].total
-  }
-
   const photos = await connection.query(sqlGetPhotoInstagrams, [album_id, pageIndex]);
   res.json({
     status: 200,
     photos: photos[0],
-    size: size,
     user: userIns[0][0]
   })
 })
@@ -285,6 +277,24 @@ router.get('/get-face-id', async (req, res) => {
   res.json({
     status: 200,
     hash: key
+  })
+})
+router.post('/get-videos-instagram', upload.single() ,async(req, res) =>{
+  const pool = createPoolSQL();
+  const { ids } = req.body;
+  const connection = await pool.getConnection();
+  const respones = await connection.query(sqlVideoInstagram, [ids]);
+  const obj = {};
+  const data = respones[0]
+  for (let i = 0; i < data.length; i++) {
+    obj[data[i].user_name] = data[i].user_name
+  }
+  const user_names = Object.keys(obj);
+  const userInfors = await connection.query(sqlGetUserByUserNames, [user_names]);
+  res.json({
+    status: 200,
+    videos: respones[0],
+    users: userInfors[0]
   })
 })
 module.exports = router;
