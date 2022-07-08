@@ -180,7 +180,10 @@ router.get('/get-instagrams', async (req, res) => {
   const connection = await pool.getConnection();
   const { offset, album_ids } = req.query;
   let pageindex = parseInt(offset);
-  const photos = await connection.query(queryInstagramPhotos, [album_ids]);
+  if(!pageindex) {
+    pageindex = Math.floor(Math.random() * 5000)
+  }
+  const photos = await connection.query(queryInstagramPhotos, [album_ids, pageindex]);
   res.json({
     status: 200,
     photos: photos[0],
