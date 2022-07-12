@@ -137,17 +137,17 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
 })
 
 router.get('/get-photos', async (req, res) => {
-  const { category, score, total, offset } = req.query;
+  const { categories, score, total, offset } = req.query;
   const pool = createPoolSQL();
   const connection = await pool.getConnection()
   let count = total;
   let pageIndex = parseInt(offset);
   if (!total) {
-    count = await connection.query(queryTotalByScore, [category, score - 10, score + 10]);
+    count = await connection.query(queryTotalByScore, [categories, score - 10, score + 10]);
     const size = Math.floor(count[0][0].total / 100)
     pageIndex = Math.floor(Math.random() * size);
   }
-  const photos = await connection.query(queryCategoryByScore, [category, score - 10, score + 10, pageIndex * 100]);
+  const photos = await connection.query(queryCategoryByScore, [categories, score - 10, score + 10, pageIndex * 100]);
   res.json({
     status: 200,
     photos: photos[0],
