@@ -2,9 +2,9 @@ const queryCategoryByScore = 'select *  from `photos` as ph INNER JOIN (select k
 const queryTotalByScore = 'select COUNT(*) as `total` from `photos` where `category` = ? and `score` BETWEEN ? and ?';
 const queryCategory = 'select * from `photos` as ph INNER JOIN (select key from `photos`  where `category` = ? LIMIT 100 OFFSET ?) as temp ON ph.key = temp.key';
 const queryTotalCategory = 'select COUNT(*) as `total` from `photos` where `category` = ?';
-const queryInstagramPhotos =  'select *  from `photosInstagram` as ph INNER JOIN (select id from `photosInstagram` where `album_id` in (?) ORDER BY id LIMIT 100 OFFSET ?) as temp ON ph.id = temp.id';
+const queryInstagramPhotos =  'select *  from `photosInstagram` as ph INNER JOIN (select id from `photosInstagram` where `album_id` in (?) ORDER BY RAND() LIMIT 100 OFFSET ?) as temp ON ph.id = temp.id';
 const sqlGetUserInstagrams = 'select * from `informationInstagram` as ph INNER JOIN  (select id from `informationInstagram` ORDER BY RAND() LIMIT 100 ) as temp ON ph.id = temp.id';
-const sqlGetPhotoInstagrams = 'select *  from `photosInstagram` as ph INNER JOIN (select id from `photosInstagram` where `album_id` = ? LIMIT 100 OFFSET ?) as temp ON ph.id = temp.id';
+const sqlGetPhotoInstagrams = 'select ph.id, ph.album_id, ph.category, ph.score, ph.sizes from `photosInstagram` as ph INNER JOIN (select id from `photosInstagram` where `album_id` = ? LIMIT 100 OFFSET ?) as temp ON ph.id = temp.id';
 const sqlGetUserByUserName = 'select * from `informationInstagram` where `user_name` = ?'
 const sqlCountPhotoByUserName = 'select COUNT(*) as `total` from `photosInstagram` where `album_id` = ?';
 const sqlTotalInstagram = 'select COUNT(*) as `total` from `photosInstagram` where `album_id` in (?)';
