@@ -16,7 +16,7 @@ const crypto = require('crypto');
 const secret = 'oppai-xKlYuxUch';
 
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
-const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore, queryInstagramPhotos, sqlGetUserInstagrams, sqlGetUserByUserName, sqlGetPhotoInstagrams, sqlCountPhotoByUserName, sqlTotalInstagram, sqlGetUserByUserNames, sqlGetPhotobyUserNames, sqlVideoInstagram } = require('../sql/index');
+const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore, queryInstagramPhotos, sqlGetUserInstagrams, sqlGetUserByUserName, sqlGetPhotoInstagrams, sqlCountPhotoByUserName, sqlTotalInstagram, sqlGetUserByUserNames, sqlGetPhotobyUserNames, sqlVideoInstagram, sqlGetVideosUsername, sqlVideosDouyin, sqlGetUserNameDouyin, sqlGetVideosDouyinByUserName } = require('../sql/index');
 const mysql = require('mysql2/promise');
 const loadTf = require('tfjs-lambda');
 let tf = null;
@@ -180,7 +180,7 @@ router.get('/get-instagrams', async (req, res) => {
   const connection = await pool.getConnection();
   const { offset, album_ids } = req.query;
   let pageindex = parseInt(offset);
-  if(!pageindex) {
+  if (!pageindex) {
     pageindex = Math.floor(Math.random() * 5000)
   }
   const photos = await connection.query(queryInstagramPhotos, [album_ids, pageindex]);
@@ -217,14 +217,20 @@ router.get('/get-photo-instagrams', async (req, res) => {
   const userIns = await connection.query(sqlGetUserByUserName, [user_name]);
   const album_id = userIns[0][0].album_id;
   const pageIndex = parseInt(offset) || 0;
-  const photos = await connection.query(sqlGetPhotoInstagrams, [album_id, pageIndex]);
+  const getPhotoInstagrams = connection.query(sqlGetPhotoInstagrams, [album_id, pageIndex]);
+  const getVideoUsernames = connection.query(sqlGetVideosUsername, [user_name, pageIndex]);
+  const promises = [getPhotoInstagrams, getVideoUsernames]
+  const respones = await Promise.all(promises)
+  const photos = respones[0];
+  const videos = respones[1];
   res.json({
     status: 200,
     photos: photos[0],
-    user: userIns[0][0]
+    user: userIns[0][0],
+    videos: videos[0]
   })
 })
-router.get('/get-users-face', async(req, res) => {
+router.get('/get-users-face', async (req, res) => {
   const { hash } = req.query;
   if (!client) {
     client = new Redis(process.env.redis);
@@ -267,8 +273,8 @@ router.get('/get-face-id', async (req, res) => {
     client = new Redis(process.env.redis);
   }
   const getUser = await client.hget(key, 'users');
-  if(!getUser) {
-    client.hset(key, {'users': JSON.stringify(userInfors[0])})
+  if (!getUser) {
+    client.hset(key, { 'users': JSON.stringify(userInfors[0]) })
     client.expire(key, 86400);
   }
   res.json({
@@ -276,7 +282,7 @@ router.get('/get-face-id', async (req, res) => {
     hash: key
   })
 })
-router.post('/get-videos-instagram', upload.single() ,async(req, res) =>{
+router.post('/get-videos-instagram', upload.single(), async (req, res) => {
   const pool = createPoolSQL();
   const { ids } = req.body;
   const connection = await pool.getConnection();
@@ -292,6 +298,35 @@ router.post('/get-videos-instagram', upload.single() ,async(req, res) =>{
     status: 200,
     videos: respones[0],
     users: userInfors[0]
+  })
+})
+
+router.post('/get-videos-douyin', upload.single(), async (req, res) => {
+  const pool = createPoolSQL();
+  const { ids } = req.body;
+  const connection = await pool.getConnection();
+  const respones = await connection.query(sqlVideosDouyin, [ids]);
+  const obj = {};
+  const data = respones[0]
+  for (let i = 0; i < data.length; i++) {
+    obj[data[i].user_name] = data[i].user_name
+  }
+  const user_names = Object.keys(obj);
+  const userInfors = await connection.query(sqlGetUserNameDouyin, [user_names]);
+  res.json({
+    status: 200,
+    videos: respones[0],
+    users: userInfors[0]
+  })
+})
+router.get('/get-videos-username', async (req, res) => {
+  const {user_name} = req.query;
+  const pool = createPoolSQL();
+  const connection = await pool.getConnection();
+  const respones = await connection.query(sqlGetVideosDouyinByUserName, [user_name])
+  res.json({
+    status: 200,
+    videos: respones[0]
   })
 })
 module.exports = router;

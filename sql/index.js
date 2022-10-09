@@ -11,6 +11,10 @@ const sqlTotalInstagram = 'select COUNT(*) as `total` from `photosInstagram` whe
 const sqlGetUserByUserNames = 'select *  from `informationInstagram` where user_name in (?)';
 const sqlGetPhotobyUserNames = 'select *  from  (select *, row_number() over (partition by album_id order by album_id desc) as seqnum from photosInstagram f) f where seqnum <= 10 and album_id in (?)';
 const sqlVideoInstagram = 'select * from `videoInstagrams` as v INNER JOIN (select id from `videoInstagrams` where id not in(?) ORDER BY RAND() LIMIT 100) as temp On v.id = temp.id';
+const sqlGetVideosUsername = 'select * from `videoInstagrams` as v INNER JOIN (select id from `videoInstagrams` where user_name = ? LIMIT 100 OFFSET ?) as temp On v.id = temp.id';
+const sqlVideosDouyin = 'select * from `videoDouyins` as v INNER JOIN (select id from `videoDouyins` where id not in(?) ORDER BY RAND() LIMIT 100) as temp On v.id = temp.id';
+const sqlGetUserNameDouyin = 'select *  from `informationDouyins` where user_name in (?)';
+const sqlGetVideosDouyinByUserName = 'select * from `videoDouyins` as v INNER JOIN (select id from `videoDouyins` where user_name = ? LIMIT 100) as temp On v.id = temp.id';
 module.exports = {
   queryCategoryByScore,
   queryTotalByScore,
@@ -24,5 +28,9 @@ module.exports = {
   sqlTotalInstagram,
   sqlGetUserByUserNames,
   sqlGetPhotobyUserNames,
-  sqlVideoInstagram
+  sqlVideoInstagram,
+  sqlGetVideosUsername,
+  sqlVideosDouyin,
+  sqlGetUserNameDouyin,
+  sqlGetVideosDouyinByUserName
 }
