@@ -19,7 +19,7 @@ const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' 
 const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore, queryInstagramPhotos, sqlGetUserInstagrams, sqlGetUserByUserName, sqlGetPhotoInstagrams, sqlCountPhotoByUserName, sqlTotalInstagram, sqlGetUserByUserNames, sqlGetPhotobyUserNames, sqlVideoInstagram, sqlGetVideosUsername, sqlVideosDouyin, sqlGetUserNameDouyin, sqlGetVideosDouyinByUserName } = require('../sql/index');
 const mysql = require('mysql2/promise');
 const loadTf = require('tfjs-lambda');
-require('@tensorflow/tfjs-node');
+
 let tf = null;
 let model = null;
 const supabase = createClient(
