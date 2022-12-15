@@ -18,7 +18,7 @@ const secret = 'oppai-xKlYuxUch';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
 const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore, queryInstagramPhotos, sqlGetUserInstagrams, sqlGetUserByUserName, sqlGetPhotoInstagrams, sqlCountPhotoByUserName, sqlTotalInstagram, sqlGetUserByUserNames, sqlGetPhotobyUserNames, sqlVideoInstagram, sqlGetVideosUsername, sqlVideosDouyin, sqlGetUserNameDouyin, sqlGetVideosDouyinByUserName } = require('../sql/index');
 const mysql = require('mysql2/promise');
-const loadTf = require('tensorflow-lambda')
+const loadTf = require('tfjs-lambda');
 
 let tf = null;
 let model = null;
@@ -46,6 +46,22 @@ const createHash = (fBuffer) => {
       res(data)
     });
   })
+}
+
+async function loadModel() {
+  try {
+    const tf = await loadTf()
+
+    if (tfModelCache) {
+      return tfModelCache
+    }
+
+    tfModelCache = await tf.loadLayersModel(`${TF_MODEL_URL}/model.json`)
+    return tfModelCache
+  } catch (err) {
+    console.log(err)
+    throw BadRequestError('The model could not be loaded')
+  }
 }
 router.get('/', async (req, res) => {
   const root = 'https://sun9-85.userapi.com/s/v1/ig2/45x4lTwMI9mDfblAf5fVlRHyiORowBhTC5M2ThQxf3Avq9spzMHnt4InVu-c-Zsgx73FXEXxu67NuYY83F6i7Pbh.jpg?size=1365x2048&quality=96&type=album';
@@ -92,7 +108,7 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     tf = await loadTf()
   }
   if (!model) {
-    model = await tf.loadLayersModel(modelURL);
+    model = await loadModel()
   }
   const metadata = await axios.get(metadataURL);
   const fBuffer = req.file.buffer;
