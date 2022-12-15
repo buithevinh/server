@@ -19,7 +19,7 @@ const allowCORS = async function (req, res, next) {
 
 
 app.use('/api/imagehash', allowCORS, hash)
-
+app.use('*', allowCORS)
 app.listen(port);
 app.get('/', async (req, res) => {
   res.json({ staus: 200, message: '2222222' })
