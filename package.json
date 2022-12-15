@@ -16,9 +16,6 @@
   "bugs": {
     "url": "https://github.com/buithevinh/server/issues"
   },
-  "engines": {
-    "node": "10.x"
-  },
   "homepage": "https://github.com/buithevinh/server#readme",
   "dependencies": {
     "@supabase/supabase-js": "^1.35.3",
