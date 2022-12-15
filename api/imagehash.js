@@ -89,9 +89,8 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     status: 200,
     time: time
   });
-  if (!tf) {
-    tf = await loadTf()
-  }
+  
+  tf = await loadTf()
   if (!model) {
     model = await tf.loadLayersModel(modelURL)
   }
