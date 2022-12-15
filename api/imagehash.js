@@ -48,21 +48,6 @@ const createHash = (fBuffer) => {
   })
 }
 
-async function loadModel() {
-  try {
-    const tf = await loadTf()
-
-    if (tfModelCache) {
-      return tfModelCache
-    }
-
-    tfModelCache = await tf.loadLayersModel(modelURL)
-    return tfModelCache
-  } catch (err) {
-    console.log(err)
-    throw BadRequestError('The model could not be loaded')
-  }
-}
 router.get('/', async (req, res) => {
   const root = 'https://sun9-85.userapi.com/s/v1/ig2/45x4lTwMI9mDfblAf5fVlRHyiORowBhTC5M2ThQxf3Avq9spzMHnt4InVu-c-Zsgx73FXEXxu67NuYY83F6i7Pbh.jpg?size=1365x2048&quality=96&type=album';
   try {
@@ -108,7 +93,7 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     tf = await loadTf()
   }
   if (!model) {
-    model = await loadModel()
+    model = await tf.loadLayersModel(modelURL)
   }
   const metadata = await axios.get(metadataURL);
   const fBuffer = req.file.buffer;
