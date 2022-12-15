@@ -56,7 +56,7 @@ async function loadModel() {
       return tfModelCache
     }
 
-    tfModelCache = await tf.loadLayersModel(`${TF_MODEL_URL}/model.json`)
+    tfModelCache = await tf.loadLayersModel(modelURL)
     return tfModelCache
   } catch (err) {
     console.log(err)
