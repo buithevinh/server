@@ -20,7 +20,7 @@ const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalBySco
 const mysql = require('mysql2/promise');
 // const loadTf = require('tfjs-lambda');
 const tf = require('@tensorflow/tfjs-node');
-let tf = null;
+
 let model = null;
 const supabase = createClient(
   process.env.URL_SUPABASE,
