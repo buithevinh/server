@@ -20,13 +20,15 @@ const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalBySco
 const mysql = require('mysql2/promise');
 // const loadTf = require('tensorflow-lambda');
 import { Readable } from 'stream';
-
-const response = await axios.get(
+let readStream = ''
+async () => {
+const response = axios.get(
   'https://github.com/jlarmstrongiv/tfjs-node-lambda/releases/download/v2.0.10/nodejs14.x-tf3.6.1.br',
   { responseType: 'arraybuffer' },
 );
+readStream = Readable.from(response.data);
+}()
 
-const readStream = Readable.from(response.data);
 import loadTf from 'tfjs-node-lambda';
 
 let tf = null;
