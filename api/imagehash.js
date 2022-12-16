@@ -18,8 +18,8 @@ const secret = 'oppai-xKlYuxUch';
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
 const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore, queryInstagramPhotos, sqlGetUserInstagrams, sqlGetUserByUserName, sqlGetPhotoInstagrams, sqlCountPhotoByUserName, sqlTotalInstagram, sqlGetUserByUserNames, sqlGetPhotobyUserNames, sqlVideoInstagram, sqlGetVideosUsername, sqlVideosDouyin, sqlGetUserNameDouyin, sqlGetVideosDouyinByUserName } = require('../sql/index');
 const mysql = require('mysql2/promise');
-const loadTf = require('tfjs-lambda');
-
+// const loadTf = require('tfjs-lambda');
+const tf = require('@tensorflow/tfjs-node');
 let tf = null;
 let model = null;
 const supabase = createClient(
@@ -90,7 +90,7 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     time: time
   });
 
-  tf = await loadTf();
+//   tf = await loadTf();
   if (!model) {
     model = await tf.loadLayersModel(modelURL)
   }
