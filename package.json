@@ -30,7 +30,6 @@
     "multer": "^1.4.4",
     "mysql2": "^2.3.3",
     "vptree": "^1.0.0",
-    "tfjs-node-lambda": "^1.6.1",
-    "tfjs-node-lambda-releases": "^1.6.1"
+    "tfjs-lambda": "^0.0.14"
   }
 }

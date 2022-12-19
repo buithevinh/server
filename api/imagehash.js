@@ -18,11 +18,7 @@ const os =  require('os');
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
 const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore, queryInstagramPhotos, sqlGetUserInstagrams, sqlGetUserByUserName, sqlGetPhotoInstagrams, sqlCountPhotoByUserName, sqlTotalInstagram, sqlGetUserByUserNames, sqlGetPhotobyUserNames, sqlVideoInstagram, sqlGetVideosUsername, sqlVideosDouyin, sqlGetUserNameDouyin, sqlGetVideosDouyinByUserName } = require('../sql/index');
 const mysql = require('mysql2/promise');
-// const loadTf = require('tfjs-lambda');
-// const tf = require('@tensorflow/tfjs-node');
-const loadTf = require('tfjs-node-lambda');
-const readStream = fs.createReadStream(path.join(__dirname,  '/nodejs14.x-tf3.6.1.br'));
-
+const loadTf = require('tfjs-lambda');
 let tf = null;
 let model = null;
 const supabase = createClient(
@@ -93,7 +89,7 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     time: time
   });
 
-  tf = await loadTf(readStream);
+  tf = await loadTf();
   if (!model) {
     model = await tf.loadLayersModel(modelURL)
   }
