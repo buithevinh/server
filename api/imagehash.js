@@ -21,7 +21,7 @@ const mysql = require('mysql2/promise');
 // const loadTf = require('tfjs-lambda');
 // const tf = require('@tensorflow/tfjs-node');
 const loadTf = require('tfjs-node-lambda');
-const readStream = fs.createReadStream('./api/nodejs14.x-tf3.6.1.br');
+const readStream = fs.createReadStream(path.join(__dirname,  '/nodejs14.x-tf3.6.1.br'));
 
 let tf = null;
 let model = null;
