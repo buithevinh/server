@@ -14,15 +14,14 @@ let client = null;
 const { default: axios } = require('axios');
 const crypto = require('crypto');
 const secret = 'oppai-xKlYuxUch';
-
+const os =  require('os');
 const metadataURL = 'https://teachablemachine.withgoogle.com/models/xKlYuxUch/' + 'metadata.json';
 const { queryCategory, queryCategoryByScore, queryTotalCategory, queryTotalByScore, queryInstagramPhotos, sqlGetUserInstagrams, sqlGetUserByUserName, sqlGetPhotoInstagrams, sqlCountPhotoByUserName, sqlTotalInstagram, sqlGetUserByUserNames, sqlGetPhotobyUserNames, sqlVideoInstagram, sqlGetVideosUsername, sqlVideosDouyin, sqlGetUserNameDouyin, sqlGetVideosDouyinByUserName } = require('../sql/index');
 const mysql = require('mysql2/promise');
 // const loadTf = require('tfjs-lambda');
 // const tf = require('@tensorflow/tfjs-node');
 const loadTf = require('tfjs-node-lambda');
-const { Readable } = require('stream');
-
+const readStream = fs.createReadStream('./api/nodejs14.x-tf3.6.1.br');
 
 let tf = null;
 let model = null;
@@ -93,12 +92,8 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     status: 200,
     time: time
   });
-  const response = await axios.get(
-    'https://github.com/jlarmstrongiv/tfjs-node-lambda/releases/download/v2.0.10/nodejs14.x-tf3.6.1.br',
-    { responseType: 'arraybuffer' }
-  )
-  readable = Readable.from(response.data);
-  tf = await loadTf(readable);
+
+  tf = await loadTf(readStream);
   if (!model) {
     model = await tf.loadLayersModel(modelURL)
   }
