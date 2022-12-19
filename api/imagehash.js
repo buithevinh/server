@@ -22,14 +22,7 @@ const mysql = require('mysql2/promise');
 // const tf = require('@tensorflow/tfjs-node');
 const loadTf = require('tfjs-node-lambda');
 const { Readable } = require('stream');
-let readable = null;
-(async () => {
-  const response = await axios.get(
-  'https://github.com/jlarmstrongiv/tfjs-node-lambda/releases/download/v2.0.10/nodejs14.x-tf3.6.1.br',
-  { responseType: 'arraybuffer' },
-);
-  readable = Readable.from(response.data)
-})();
+
 
 let tf = null;
 let model = null;
@@ -100,7 +93,11 @@ router.post('/get-tagging', upload.single('file'), async (req, res) => {
     status: 200,
     time: time
   });
-  console.log(readable)
+  const response = await axios.get(
+    'https://github.com/jlarmstrongiv/tfjs-node-lambda/releases/download/v2.0.10/nodejs14.x-tf3.6.1.br',
+    { responseType: 'arraybuffer' }
+  )
+  readable = Readable.from(response.data);
   tf = await loadTf(readable);
   if (!model) {
     model = await tf.loadLayersModel(modelURL)
