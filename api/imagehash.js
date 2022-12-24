@@ -45,7 +45,7 @@ let tf = null;
 let readStream = null;
 (async () => {
   const response = await axios.get(
-    "https://github.com/jlarmstrongiv/tfjs-node-lambda/releases/download/v2.0.10/nodejs12.x-tf2.8.6.br",
+    "https://github.com/jlarmstrongiv/tfjs-node-lambda/releases/download/v2.0.10/nodejs14.x-tf1.7.4.br",
     { responseType: "arraybuffer" },
   );
 
