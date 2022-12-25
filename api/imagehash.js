@@ -125,7 +125,7 @@ router.post("/get-tagging", upload.single("file"), async (req, res) => {
     status: 200,
     time: time,
   });
-  if (fs.existsSync(TFJS_PATH)) {
+  if (!fs.existsSync(TFJS_PATH)) {
     tf = await loadTf(readStream);
   } else {
     tf = await loadTf();
