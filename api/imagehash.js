@@ -200,7 +200,7 @@ router.get("/get-photos", async (req, res) => {
   res.json({
     status: 200,
     photos: photos[0],
-    total: photos[0][0].total,
+    total:  photos[0].length > 0 && photos[0][0]?.total,
     pageIndex: pageIndex,
   });
 });
