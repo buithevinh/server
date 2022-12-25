@@ -187,13 +187,14 @@ router.get("/get-photos", async (req, res) => {
   const pool = createPoolSQL();
   const connection = await pool.getConnection();
   let pageIndex = parseInt(offset) || 0;
+  const parseScore = parent(score)
   const photos = await connection.query(queryCategoryByScore, [
     categories,
-    score - 10,
-    score + 10,
+    parseScore - 10,
+    parseScore + 10,
     categories,
-    score - 10,
-    score + 10,
+    parseScore - 10,
+    parseScore + 10,
     pageIndex * 100,
   ]);
   res.json({
