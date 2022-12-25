@@ -43,14 +43,17 @@ const loadTf = require("tfjs-node-lambda");
 const { Readable } = require("stream");
 let tf = null;
 let readStream = null;
+const TFJS_PATH = path.join(os.tmpdir(), 'tfjs-node');
 (async () => {
-  const response = await axios.get(
-    "https://github.com/jlarmstrongiv/tfjs-node-lambda/releases/download/v2.0.10/nodejs14.x-tf1.7.4.br",
-    { responseType: "arraybuffer" },
-  );
-
-  readStream = Readable.from(response.data);
-  tf = await loadTf(readStream);
+  console.log(fs.existsSync(TFJS_PATH))
+    if (fs.existsSync(TFJS_PATH)) {
+    const response = await axios.get(
+      "https://github.com/jlarmstrongiv/tfjs-node-lambda/releases/download/v2.0.10/nodejs14.x-tf1.7.4.br",
+      { responseType: "arraybuffer" },
+    );
+    readStream = Readable.from(response.data);
+    tf = await loadTf(readStream);
+  }
 })();
 
 let model = null;
@@ -122,8 +125,11 @@ router.post("/get-tagging", upload.single("file"), async (req, res) => {
     status: 200,
     time: time,
   });
-
-  tf = await loadTf(readStream);
+  if (fs.existsSync(TFJS_PATH)) {
+    tf = await loadTf(readStream);
+  } else {
+    tf = await loadTf();
+  }
   if (!model) {
     model = await tf.loadLayersModel(modelURL);
   }
