@@ -46,7 +46,7 @@ let readStream = null;
 const TFJS_PATH = path.join(os.tmpdir(), 'tfjs-node');
 (async () => {
   console.log(fs.existsSync(TFJS_PATH))
-    if (fs.existsSync(TFJS_PATH)) {
+    if (!fs.existsSync(TFJS_PATH)) {
     const response = await axios.get(
       "https://github.com/jlarmstrongiv/tfjs-node-lambda/releases/download/v2.0.10/nodejs14.x-tf1.7.4.br",
       { responseType: "arraybuffer" },
