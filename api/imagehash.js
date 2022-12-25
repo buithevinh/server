@@ -180,18 +180,11 @@ router.get("/get-photos", async (req, res) => {
   const { categories, score, total, offset } = req.query;
   const pool = createPoolSQL();
   const connection = await pool.getConnection();
-  let count = total;
-  let pageIndex = parseInt(offset);
-  if (!total) {
-    count = await connection.query(queryTotalByScore, [
-      categories,
-      score - 10,
-      score + 10,
-    ]);
-    const size = Math.floor(count[0][0].total / 100);
-    pageIndex = Math.floor(Math.random() * size);
-  }
+  let pageIndex = parseInt(offset) || 0;
   const photos = await connection.query(queryCategoryByScore, [
+    categories,
+    score - 10,
+    score + 10,
     categories,
     score - 10,
     score + 10,
@@ -200,7 +193,7 @@ router.get("/get-photos", async (req, res) => {
   res.json({
     status: 200,
     photos: photos[0],
-    total: count[0][0].total,
+    total: photos[0][0].total,
     pageIndex: pageIndex,
   });
 });

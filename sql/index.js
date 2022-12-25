@@ -1,4 +1,4 @@
-const queryCategoryByScore = 'select *  from `photos` as ph INNER JOIN (select `key` from `photos` where JSON_CONTAINS(`categories_vr`, JSON_ARRAY(?)) = 1 and `score` BETWEEN ? and ? LIMIT 100 OFFSET ? ) as temp ON ph.key = temp.key';
+const queryCategoryByScore = 'select ph.key, ph.sizes, ph.key_album, ph.album_id, temp.total from `photos` as ph INNER JOIN (select `key`, (select count(*) from `photos` where JSON_CONTAINS(`categories_vr`, JSON_ARRAY(?)) = 1 and `score` BETWEEN ? and ? ) as `total` from `photos` where JSON_CONTAINS(`categories_vr`, JSON_ARRAY(?)) = 1 and `score` BETWEEN ? and ? LIMIT 100 OFFSET ? ) as temp ON ph.key = temp.key';
 const queryTotalByScore = 'select COUNT(*) as `total` from `photos` where JSON_CONTAINS(`categories_vr`, JSON_ARRAY(?)) = 1 and `score` BETWEEN ? and ?';
 const queryCategory = 'select * from `photos` as ph INNER JOIN (select `key` from `photos`  where `category` = ? LIMIT 100 OFFSET ?) as temp ON ph.key = temp.key';
 const queryTotalCategory = 'select COUNT(*) as `total` from `photos` where `category` = ?';
